@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 
 void initialiseGame(Game *game)
 {
-	game->userGuess[0] = 0;
+	game->userGuess = 0;
 	game->numberOfTrial = 10;
 	game->result = 0;
 
@@ -54,7 +54,7 @@ char getActualStateOfHiddenString(Game *game, char actualString[])
 int printResult(Game *game)
 {
 	char actualString[sizeof game->hiddenWord] = {0};
-	printf("You have just guessed \"%s\"\n", game->userGuess);
+	printf("You have just guessed \"%c\"\n", game->userGuess);
 
 	handleUserGuess(game);
 	getActualStateOfHiddenString(game, actualString);
@@ -73,7 +73,7 @@ void handleUserGuess(Game *game)
 {
 	char *pointerToString = NULL;
 
-	pointerToString = strstr(game->hiddenWord, game->userGuess);
+	pointerToString = strchr(game->hiddenWord, game->userGuess);
 	if (pointerToString != NULL)
 	{
 		revealALetter(game, pointerToString);
@@ -98,27 +98,59 @@ void withdrawATrial(Game *game)
 void revealALetter(Game *game, char *pointerToString)
 {
 	int position = pointerToString - game->hiddenWord;
-	game->letterFound[position] = game->userGuess[0];
+	game->letterFound[position] = game->userGuess;
 }
 
 void askUserAGuess(Game *game)
 {
 	char actualString[sizeof game->hiddenWord] = {0};
+	int foundCharacter = 0;
+	int inputIsLetter = 1;
 
-	getActualStateOfHiddenString(game, actualString);
+	do {
+		getActualStateOfHiddenString(game, actualString);
+		printQueryToUser(game, actualString);
+		game->userGuess = toupper(getchar());
+		foundCharacter = emptyBuffer();
+		if (foundCharacter == 1)
+		{
+			continue;
+		}
+		inputIsLetter = checkUserGuessIsALetter(game);
+	} while (foundCharacter != 0 || inputIsLetter == 0);
+}
+
+int checkUserGuessIsALetter(Game *game)
+{
+	if (isalpha(game->userGuess) == 0)
+	{
+		printf("Please tap a letter \n");
+	}
+
+	return isalpha(game->userGuess);
+}
+
+void printQueryToUser(Game *game, char actualString[])
+{
 	printf("You have %d trials left\n", game->numberOfTrial);
 	printf("What is the hidden word? %s\n", actualString);
 	printf("Choose a character: \n");
-	fgets(game->userGuess, 2, stdin);
-	emptyBuffer();
 }
 
-void emptyBuffer()
+int emptyBuffer()
 {
 	int c = 0;
+	int foundCharacter = 0;
 
 	while (c != '\n' && c != EOF)
 	{
 		c = getchar();
+		if (foundCharacter == 0 && c != '\n')
+		{
+			printf("Please tap only one character \n");
+			foundCharacter = 1;
+		}
 	}
+
+	return foundCharacter;
 }
