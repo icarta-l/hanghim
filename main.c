@@ -111,6 +111,10 @@ void askUserAGuess(Game *game)
 		getActualStateOfHiddenString(game, actualString);
 		printQueryToUser(game, actualString);
 		game->userGuess = toupper(getchar());
+		if (game->userGuess == EOF)
+		{
+			exit(EXIT_FAILURE);
+		}
 		foundCharacter = emptyBuffer();
 		if (foundCharacter == 1)
 		{
