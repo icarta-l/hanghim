@@ -1,2 +1,2 @@
 program:
-	gcc-12.1 main.h main.c -o test
+	gcc game.c main.c -o launch
